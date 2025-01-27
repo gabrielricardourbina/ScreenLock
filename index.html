@@ -1,11 +1,58 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
-</head>
-<body>
-    hello
-</body>
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Screen Lock</title>
+    <script>
+      const logToPage = (text) =>
+        document
+          .querySelector("#logs")
+          .append(document.createTextNode(`${text}\n`));
+      const takeLock = async () => {
+        try {
+          const wakeLock = await navigator.wakeLock.request("screen");
+          wakeLock.addEventListener("release", () => {
+            logToPage("Info: Wake Lock was released");
+          });
+          logToPage("Info: Wake Lock is active");
+        } catch (err) {
+          logToPage("Error: Failed to take Wake Lock");
+        }
+      };
+
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          return;
+        }
+        takeLock();
+      });
+      const context = new AudioContext();
+      const oscillator = context.createOscillator();
+      oscillator.type = "sine";
+      oscillator.frequency.value = 1;
+      const volume = context.createGain();
+      volume.connect(context.destination);
+      volume.gain.value = 0.1;
+      oscillator.connect(volume);
+
+      window.addEventListener("load", () => {
+        document.querySelector("#btn").addEventListener("click", async () => {
+          try {
+            oscillator.start();
+            logToPage("Info: Playing inaudible tune (1hz)");
+          } catch (error) {
+            console.error(error);
+            logToPage("Error: Failed to play inaudible tune (1hz)");
+          }
+          takeLock();
+        });
+      });
+    </script>
+  </head>
+
+  <body>
+    <button id="btn">Prevent Screen Lock</button>
+    <pre id="logs"></pre>
+  </body>
 </html>
