@@ -4,55 +4,54 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Screen Lock</title>
-    <script>
-      const logToPage = (text) =>
-        document
-          .querySelector("#logs")
-          .append(document.createTextNode(`${text}\n`));
-      const takeLock = async () => {
-        try {
-          const wakeLock = await navigator.wakeLock.request("screen");
-          wakeLock.addEventListener("release", () => {
-            logToPage("Info: Wake Lock was released");
-          });
-          logToPage("Info: Wake Lock is active");
-        } catch (err) {
-          logToPage("Error: Failed to take Wake Lock");
-        }
-      };
+    <style>
+      body {
+        margin: 0;
+        display: flex;
+        height: 100vh;
+        width: 100vw;
+        justify-content: center;
+        align-items: center;
+        background: hsl(0 0% 85%);
+      }
 
-      document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-          return;
-        }
-        takeLock();
-      });
-      const context = new AudioContext();
-      const oscillator = context.createOscillator();
-      oscillator.type = "sine";
-      oscillator.frequency.value = 1;
-      const volume = context.createGain();
-      volume.connect(context.destination);
-      volume.gain.value = 0.1;
-      oscillator.connect(volume);
+      .indicator {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-family: sans-serif;
+        width: 80vw;
+        height: 80vh;
+        font-size: 5vw;
+        background-color: hsl(0 0% 73%);
+        border: none;
+        color: hsl(0 0% 10%);
+      }
 
-      window.addEventListener("load", () => {
-        document.querySelector("#btn").addEventListener("click", async () => {
-          try {
-            oscillator.start();
-            logToPage("Info: Playing inaudible tune (1hz)");
-          } catch (error) {
-            console.error(error);
-            logToPage("Error: Failed to play inaudible tune (1hz)");
-          }
-          takeLock();
-        });
-      });
-    </script>
+      .run {
+        cursor: pointer;
+        transition: background-color 150ms ease-in-out;
+      }
+
+      .run:hover {
+        background-color: hsl(0 0% 70%);
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: hsl(0 0% 15%);
+        }
+        .indicator {
+          color: hsl(0 0% 90%);
+          background-color: hsl(0 0% 17%);
+        }
+        .run:hover {
+          background-color: hsl(0 0% 20%);
+        }
+      }
+    </style>
+    <script defer src="./index.js"></script>
   </head>
-
   <body>
-    <button id="btn">Prevent Screen Lock</button>
-    <pre id="logs"></pre>
   </body>
 </html>
